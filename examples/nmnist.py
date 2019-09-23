@@ -13,6 +13,7 @@ from spike_data_augmentation import transforms as T
 
 from IPython.core.debugger import set_trace
 from tensorboardX import SummaryWriter
+from tqdm import tqdm
 
 
 class Net(nn.Module):
@@ -46,7 +47,7 @@ def log(scalars={}, mode="train"):
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, (data, target) in enumerate(tqdm(train_loader)):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
