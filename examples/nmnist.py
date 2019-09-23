@@ -87,6 +87,7 @@ def data_aug_args(parser):
     parser.add_argument("--flip-lr-probability", type=float, help="")
     parser.add_argument("--flip-ud-probability", type=float, help="")
     parser.add_argument("--refractory-period", type=float, help="")
+    parser.add_argument("--time-jitter", type=float, help="")
 
 
 def create_data_aug(args, train=True):
@@ -112,6 +113,11 @@ def create_data_aug(args, train=True):
             augmentations.append(T.RefractoryPeriod(args.refractory_period))
             print("- RefractoryPeriod : %f" % args.refractory_period)
 
+    if args.time_jitter is not None and train:
+        if args.time_jitter > 1e-4:
+            arguments.append(T.TimeJitter(args.time_jitter))
+            print("- TimeJitter : %f" % args.time_jitter)
+
     augmentations.append(T.Volume(discrete_xy=True))
     print("- Volume")
     augmentations.append(T.NumpyAsType(np.float32))
@@ -134,6 +140,9 @@ def create_data_aug_name(args):
 
     if args.refractory_period is not None:
         name += "_rp_%0.2f" % args.refractory_period
+
+    if args.time_jitter is not None:
+        name += "_tj_%0.2f" % args.time_jitter
 
     return name
 
