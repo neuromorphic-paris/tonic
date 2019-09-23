@@ -12,6 +12,7 @@ from .time_reversal import time_reversal_numpy
 from .time_skew import time_skew_numpy
 from .uniform_noise import uniform_noise_numpy
 from .utils import guess_event_ordering_numpy, is_multi_image
+from .volume_generator import volume_numpy
 
 __all__ = [
     crop_numpy,
@@ -29,4 +30,5 @@ __all__ = [
     uniform_noise_numpy,
     guess_event_ordering_numpy,
     is_multi_image,
+    volume_numpy,
 ]

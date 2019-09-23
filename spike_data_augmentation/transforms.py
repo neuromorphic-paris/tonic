@@ -158,3 +158,26 @@ class TimeSkew(object):
             events, ordering, self.coefficient, self.offset
         )
         return events, images
+
+
+class Volume(object):
+    def __init__(self, num_time_bins=10, time_normalization_method="total"):
+        self.num_time_bins = num_time_bins
+        self.time_normalization_method = time_normalization_method
+
+    def __call__(self, events, sensor_size, ordering, images=None, multi_image=None):
+        volume = functional.volume_numpy(events, sensor_size, ordering)
+        return volume, images
+
+
+class NumpyAsType(object):
+    def __init__(self, cast_to):
+        self.cast_to = cast_to
+
+    def __call__(self, events, sensor_size, ordering, images=None, multi_image=None):
+        events = events.astype(self.cast_to)
+
+        if images is not None:
+            images = images.astype(self.cast_to)
+
+        return events, images

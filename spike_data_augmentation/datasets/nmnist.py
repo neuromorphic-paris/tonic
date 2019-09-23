@@ -38,11 +38,13 @@ class NMNIST(Dataset):
     sensor_size = (34, 34)
     ordering = "xytp"
 
-    def __init__(self, save_to, train=True, transform=None, download=False):
+    def __init__(
+        self, save_to, train=True, transform=None, download=False, num_events=-1
+    ):
         super(NMNIST, self).__init__(save_to, transform=transform)
 
         self.train = train
-        self.location_on_system = save_to
+        self.location_on_system = os.path.join(save_to, "NMNIST")
 
         if train:
             self.url = self.train_zip
@@ -74,10 +76,19 @@ class NMNIST(Dataset):
                     label_number = int(path[-1])
                     self.targets.append(label_number)
 
+        self.num_events = num_events
+
     def __getitem__(self, index):
         events, target = self.data[index], self.targets[index]
+
+        if self.num_events > 0:
+            start_ind = int((events.shape[0] - self.num_events) * np.random.rand())
+            end_ind = start_ind + self.num_events - 1
+            events = events[start_ind:end_ind, :]
+
         if self.transform is not None:
             events = self.transform(events, self.sensor_size, self.ordering)
+
         return events, target
 
     def __len__(self):

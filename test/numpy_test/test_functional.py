@@ -612,3 +612,28 @@ class TestFunctionalAPI(unittest.TestCase):
 
         self.assertTrue(len(noisy_events) > len(original_events))
         self.assertTrue(np.isin(original_events, noisy_events).all())
+
+    def testVolumeCreation(self):
+        events = np.array(
+            [
+                [0, 0, 0, -1],
+                [1, 1, 1, 1],
+                [1, 1, 1, 1],
+                [2.5, 2.5, 2.5, 1],
+                [2.5, 2.5, 2.5, 1],
+                [3, 3, 3, 1],
+            ]
+        )
+
+        sensor_size = [4, 4]
+        n_time_bins = 4
+
+        volume = F.volume_numpy(events, sensor_size, None, n_time_bins)
+
+        self.assertTrue(np.isclose(volume[0, 0, 0], -1.0))
+        self.assertTrue(np.isclose(volume[1, 1, 1], 2.0))
+        for x in [2, 3]:
+            for y in [2, 3]:
+                for t in [2, 3]:
+                    val = 1.25 if x == y == t == 3 else 0.25
+                    self.assertTrue(np.isclose(volume[x, y, t], val))
