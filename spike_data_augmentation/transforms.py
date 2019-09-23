@@ -161,12 +161,22 @@ class TimeSkew(object):
 
 
 class Volume(object):
-    def __init__(self, num_time_bins=10, time_normalization_method="total"):
+    def __init__(
+        self, num_time_bins=10, time_normalization_method="total", discrete_xy=True
+    ):
         self.num_time_bins = num_time_bins
         self.time_normalization_method = time_normalization_method
+        self.discrete_xy = discrete_xy
 
     def __call__(self, events, sensor_size, ordering, images=None, multi_image=None):
-        volume = functional.volume_numpy(events, sensor_size, ordering)
+        volume = functional.volume_numpy(
+            events,
+            sensor_size,
+            ordering,
+            self.num_time_bins,
+            self.time_normalization_method,
+            self.discrete_xy,
+        )
         return volume, images
 
 

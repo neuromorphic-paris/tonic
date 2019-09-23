@@ -104,7 +104,7 @@ def create_data_aug(args, train=True):
     if args.refractory_period is not None and train:
         augmentations.append(T.RefractoryPeriod(args.refractory_period))
 
-    augmentations.append(T.Volume())
+    augmentations.append(T.Volume(discrete_xy=True))
     augmentations.append(T.NumpyAsType(np.float32))
 
     return T.Compose(augmentations)

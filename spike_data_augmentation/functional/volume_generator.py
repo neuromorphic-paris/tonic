@@ -29,6 +29,7 @@ def volume_numpy(
     ordering=None,
     num_time_bins=10,
     time_normalization_method="total",
+    discrete_xy=True,
 ):
     """Creates an event volume out of events
 
@@ -65,20 +66,32 @@ def volume_numpy(
     else:
         raise NotImplementedError()
 
-    x_fl, x_ce = calc_floor_ceil_delta(events[:, x_loc])
-    y_fl, y_ce = calc_floor_ceil_delta(events[:, y_loc])
-    t_fl, t_ce = calc_floor_ceil_delta(events[:, t_loc])
     p = events[:, p_loc]
 
-    for x in [x_fl, x_ce]:
-        for y in [y_fl, y_ce]:
-            for t in [t_fl, t_ce]:
-                dt = x[1] * y[1] * t[1]
-                x_i, y_i, t_i = x[0], y[0], t[0]
-                inds, vals = create_update_combined_polarity(
-                    x_i, y_i, t_i, p, dt, vol_size
-                )
+    if not discrete_xy:
+        x_fl, x_ce = calc_floor_ceil_delta(events[:, x_loc])
+        y_fl, y_ce = calc_floor_ceil_delta(events[:, y_loc])
+        t_fl, t_ce = calc_floor_ceil_delta(events[:, t_loc])
+        for x in [x_fl, x_ce]:
+            for y in [y_fl, y_ce]:
+                for t in [t_fl, t_ce]:
+                    dt = x[1] * y[1] * t[1]
+                    x_i, y_i, t_i = x[0], y[0], t[0]
+                    inds, vals = create_update_combined_polarity(
+                        x_i, y_i, t_i, p, dt, vol_size
+                    )
 
-                np.add.at(volume.reshape(-1), inds, vals)
+                    np.add.at(volume.reshape(-1), inds, vals)
+    else:
+        t_fl, t_ce = calc_floor_ceil_delta(events[:, t_loc])
+        x_i = events[:, x_loc].astype(np.int32)
+        y_i = events[:, y_loc].astype(np.int32)
+
+        for t in [t_fl, t_ce]:
+            dt = t[1]
+            t_i = t[0]
+            inds, vals = create_update_combined_polarity(x_i, y_i, t_i, p, dt, vol_size)
+
+            np.add.at(volume.reshape(-1), inds, vals)
 
     return volume

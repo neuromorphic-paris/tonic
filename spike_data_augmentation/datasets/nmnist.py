@@ -4,6 +4,13 @@ import numpy as np
 from .dataset import Dataset
 from .utils import check_integrity, download_and_extract_archive
 
+try:
+    import h5py
+
+    HAS_H5PY = True
+except:
+    HAS_H5PY = False
+
 
 class NMNIST(Dataset):
     """NMNIST <https://www.garrickorchard.com/datasets/n-mnist> data set.
@@ -39,7 +46,13 @@ class NMNIST(Dataset):
     ordering = "xytp"
 
     def __init__(
-        self, save_to, train=True, transform=None, download=False, num_events=-1
+        self,
+        save_to,
+        train=True,
+        transform=None,
+        download=False,
+        num_events=-1,
+        use_h5py=False,
     ):
         super(NMNIST, self).__init__(save_to, transform=transform)
 
