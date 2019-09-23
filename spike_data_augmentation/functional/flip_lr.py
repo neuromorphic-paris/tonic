@@ -52,6 +52,6 @@ def flip_lr_numpy(
 
         x_loc = ordering.index("x")
 
-        events[:, x_loc] = sensor_size[0] - events[:, x_loc]
+        events[:, x_loc] = sensor_size[0] - events[:, x_loc] - 1
 
     return events, images

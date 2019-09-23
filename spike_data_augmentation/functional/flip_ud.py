@@ -53,6 +53,6 @@ def flip_ud_numpy(
 
         y_loc = ordering.index("y")
 
-        events[:, y_loc] = sensor_size[1] - events[:, y_loc]
+        events[:, y_loc] = sensor_size[1] - events[:, y_loc] - 1
 
     return events, images
