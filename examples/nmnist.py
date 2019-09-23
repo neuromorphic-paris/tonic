@@ -95,21 +95,27 @@ def create_data_aug(args, train=True):
     if args.drop_probability is not None and train:
         if args.drop_probability > 0.0:
             augmentations.append(T.DropEvent(args.drop_probability))
+            print("- DropEvent : %f" % args.drop_probability)
 
     if args.flip_lr_probability is not None and train:
         if args.flip_lr_probability > 0.0:
             augmentations.append(T.FlipLR(args.flip_lr_probability))
+            print("- FlipLR : %f" % args.flip_lr_probability)
 
     if args.flip_ud_probability is not None and train:
         if args.flip_lr_probability > 0.0:
             augmentations.append(T.FlipUD(args.flip_ud_probability))
+            print("- FlipUD : %f" % args.flip_ud_probability)
 
     if args.refractory_period is not None and train:
         if args.refractory_period > 0.0:
             augmentations.append(T.RefractoryPeriod(args.refractory_period))
+            print("- RefractoryPeriod : %f" % args.refractory_period)
 
     augmentations.append(T.Volume(discrete_xy=True))
+    print(" - Volume")
     augmentations.append(T.NumpyAsType(np.float32))
+    print(" - NumpyAsType")
 
     return T.Compose(augmentations)
 
@@ -199,7 +205,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    kwargs = {"num_workers": 16, "pin_memory": True} if use_cuda else {}
+    kwargs = {"num_workers": 0, "pin_memory": True} if use_cuda else {}
     train_loader = torch.utils.data.DataLoader(
         NMNIST(
             "../data",
