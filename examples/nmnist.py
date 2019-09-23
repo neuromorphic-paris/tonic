@@ -93,29 +93,29 @@ def create_data_aug(args, train=True):
     augmentations = []
 
     if args.drop_probability is not None and train:
-        if args.drop_probability > 0.0:
+        if args.drop_probability > 1e-4:
             augmentations.append(T.DropEvent(args.drop_probability))
             print("- DropEvent : %f" % args.drop_probability)
 
     if args.flip_lr_probability is not None and train:
-        if args.flip_lr_probability > 0.0:
+        if args.flip_lr_probability > 1e-4:
             augmentations.append(T.FlipLR(args.flip_lr_probability))
             print("- FlipLR : %f" % args.flip_lr_probability)
 
     if args.flip_ud_probability is not None and train:
-        if args.flip_lr_probability > 0.0:
+        if args.flip_lr_probability > 1e-4:
             augmentations.append(T.FlipUD(args.flip_ud_probability))
             print("- FlipUD : %f" % args.flip_ud_probability)
 
     if args.refractory_period is not None and train:
-        if args.refractory_period > 0.0:
+        if args.refractory_period > 1e-4:
             augmentations.append(T.RefractoryPeriod(args.refractory_period))
             print("- RefractoryPeriod : %f" % args.refractory_period)
 
     augmentations.append(T.Volume(discrete_xy=True))
-    print(" - Volume")
+    print("- Volume")
     augmentations.append(T.NumpyAsType(np.float32))
-    print(" - NumpyAsType")
+    print("- NumpyAsType")
 
     return T.Compose(augmentations)
 
