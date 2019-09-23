@@ -4,13 +4,6 @@ import numpy as np
 from .dataset import Dataset
 from .utils import check_integrity, download_and_extract_archive
 
-try:
-    import h5py
-
-    HAS_H5PY = True
-except:
-    HAS_H5PY = False
-
 
 class NMNIST(Dataset):
     """NMNIST <https://www.garrickorchard.com/datasets/n-mnist> data set.
@@ -46,13 +39,7 @@ class NMNIST(Dataset):
     ordering = "xytp"
 
     def __init__(
-        self,
-        save_to,
-        train=True,
-        transform=None,
-        download=False,
-        num_events=-1,
-        use_h5py=False,
+        self, save_to, train=True, transform=None, download=False, num_events=-1
     ):
         super(NMNIST, self).__init__(save_to, transform=transform)
 
@@ -70,33 +57,65 @@ class NMNIST(Dataset):
             self.filename = self.test_filename
             self.folder_name = "Test"
 
-        if download:
-            self.download()
-
-        if not self._check_integrity():
-            raise RuntimeError(
-                "Dataset not found or corrupted."
-                + " You can use download=True to download it"
-            )
-
         file_path = self.location_on_system + "/" + self.folder_name
-        for path, dirs, files in os.walk(file_path):
-            dirs.sort()
-            for file in files:
-                if file.endswith("bin"):
-                    events = self._read_dataset_file(path + "/" + file)
-                    self.data.append(events)
-                    label_number = int(path[-1])
-                    self.targets.append(label_number)
+
+        numpy_cache_path = file_path + ".npz"
+
+        if os.path.exists(numpy_cache_path):
+            cache = np.load(numpy_cache_path)
+            self.data_sizes = cache["data_sizes"]
+            self.data_locations = cache["data_locations"]
+            self.data = cache["data"]
+            self.targets = cache["targets"]
+        else:
+            if download:
+                self.download()
+
+            if not self._check_integrity():
+                raise RuntimeError(
+                    "Dataset not found or corrupted."
+                    + " You can use download=True to download it"
+                )
+
+            for path, dirs, files in os.walk(file_path):
+                dirs.sort()
+                for file in files:
+                    if file.endswith("bin"):
+                        events = self._read_dataset_file(path + "/" + file)
+                        self.data.append(events)
+                        label_number = int(path[-1])
+                        self.targets.append(label_number)
+
+            self.data_sizes = np.array([d.shape[0] for d in self.data])
+            self.data_locations = np.cumsum(self.data_sizes)
+            self.data = np.concatenate(self.data)
+            self.targets = np.array(self.targets)
+
+            print("Saving numpy cache %s" % numpy_cache_path)
+            np.savez(
+                numpy_cache_path,
+                data_sizes=self.data_sizes,
+                data_locations=self.data_locations,
+                data=self.data,
+                targets=self.targets,
+            )
 
         self.num_events = num_events
 
     def __getitem__(self, index):
-        events, target = self.data[index], self.targets[index]
+        target = self.targets[index]
+
+        start_loc = self.data_locations[index - 1] if index - 1 > -1 else 0
+        end_loc = self.data_locations[index]
+
+        events = self.data[start_loc:end_loc, :]
 
         if self.num_events > 0:
-            start_ind = int((events.shape[0] - self.num_events) * np.random.rand())
-            end_ind = start_ind + self.num_events - 1
+            start_ind = max(
+                0, int((events.shape[0] - self.num_events) * np.random.rand())
+            )
+
+            end_ind = min(start_ind + self.num_events, events.shape[0])
             events = events[start_ind:end_ind, :]
 
         if self.transform is not None:
@@ -105,7 +124,7 @@ class NMNIST(Dataset):
         return events, target
 
     def __len__(self):
-        return len(self.data)
+        return self.targets.shape[0]
 
     def download(self):
         download_and_extract_archive(
