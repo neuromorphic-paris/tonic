@@ -115,7 +115,7 @@ def create_data_aug(args, train=True):
 
     if args.time_jitter is not None and train:
         if args.time_jitter > 1e-4:
-            arguments.append(T.TimeJitter(args.time_jitter))
+            augmentations.append(T.TimeJitter(args.time_jitter))
             print("- TimeJitter : %f" % args.time_jitter)
 
     augmentations.append(T.Volume(discrete_xy=True))
