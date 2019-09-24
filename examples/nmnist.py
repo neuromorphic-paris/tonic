@@ -126,27 +126,6 @@ def create_data_aug(args, train=True):
     return T.Compose(augmentations)
 
 
-def create_data_aug_name(args):
-    name = ""
-
-    if args.drop_probability is not None:
-        name += "_dp_%0.2f" % args.drop_probability
-
-    if args.flip_lr_probability is not None:
-        name += "_flr_%0.2f" % args.flip_lr_probability
-
-    if args.flip_ud_probability is not None:
-        name += "_fud_%0.2f" % args.flip_ud_probability
-
-    if args.refractory_period is not None:
-        name += "_rp_%0.2f" % args.refractory_period
-
-    if args.time_jitter is not None:
-        name += "_tj_%0.2f" % args.time_jitter
-
-    return name
-
-
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description="PyTorch MNIST Example")
@@ -244,9 +223,7 @@ def main():
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
     global log_writer
-    log_writer = SummaryWriter(
-        os.path.join(args.logdir, args.name + create_data_aug_name(args))
-    )
+    log_writer = SummaryWriter(os.path.join(args.logdir, args.name))
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
